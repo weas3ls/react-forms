@@ -1,27 +1,28 @@
-import { useRef, useState } from "react";
+import { useInput } from "../hooks/useInput";
+import { hasMinLength, isEmail, isNotEmpty } from "../util/validation";
+import Input from "./Input";
 
 export default function Login() {
-    const [emailIsInvalid, setEmailIsInvalid] = useState();
+    const {
+        value: emailValue,
+        handleInputChange: handleEmailChange,
+        handleInputBlur: handleEmailBlur,
+        hasError: emailHasError,
+    } = useInput("", value => isEmail(value) && isNotEmpty(value));
 
-    const email = useRef();
-    const password = useRef();
+    const {
+        value: passwordValue,
+        handleInputChange: handlePasswordChange,
+        handleInputBlur: handlePasswordBlur,
+        hasError: passwordHasError,
+    } = useInput("", value => hasMinLength(value, 6));
 
     function handleSubmit(event) {
         event.preventDefault();
 
-        const enteredEmail = email.current.value;
-        const enteredPassword = password.current.value;
+        if (emailHasError || passwordHasError) return;
 
-        const emailIsValid = enteredEmail.includes("@");
-
-        if (!emailIsValid) {
-            setEmailIsInvalid(true);
-            return;
-        }
-
-        setEmailIsInvalid(false);
-
-        console.log("Sending HTTP request...");
+        console.log(emailValue, passwordValue);
     }
 
     return (
@@ -29,16 +30,27 @@ export default function Login() {
             <h2>Login</h2>
 
             <div className="control-row">
-                <div className="control no-margin">
-                    <label htmlFor="email">Email</label>
-                    <input id="email" type="email" name="email" ref={email} />
-                    <div className="control-error">{emailIsInvalid && <p>Please enter a valid email address</p>}</div>
-                </div>
+                <Input
+                    label={"Email"}
+                    id={"email"}
+                    name={"email"}
+                    type={"email"}
+                    onBlur={handleEmailBlur}
+                    onChange={handleEmailChange}
+                    value={emailValue}
+                    error={emailHasError && "Please enter a valid email"}
+                />
 
-                <div className="control no-margin">
-                    <label htmlFor="password">Password</label>
-                    <input id="password" type="password" name="password" ref={password} />
-                </div>
+                <Input
+                    label={"Password"}
+                    id={"password"}
+                    name={"password"}
+                    type={"password"}
+                    onBlur={handlePasswordBlur}
+                    onChange={handlePasswordChange}
+                    value={passwordValue}
+                    error={passwordHasError && "Please enter a valid password"}
+                />
             </div>
 
             <p className="form-actions">
